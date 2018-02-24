@@ -4,8 +4,9 @@ function generateMap()
     for y = 1, 18 do
         local row = {}
         local rowLength = 19
+        local offset = y % 2
 
-        if y % 2 == 0 then
+        if offset == 0 then
             rowLength = 18
         end
 
@@ -20,7 +21,7 @@ function generateMap()
                 tile = 2
             end
 
-            table.insert(row, tile)
+            table.insert(row, makeTile(x * 32 - offset * 16, y * 24, tile))
         end
 
         table.insert(map, row)
@@ -36,7 +37,7 @@ function generateMap()
             break
         end
 
-        map[trailY][trailX] = 3
+        map[trailY][trailX].setTile(3)
 
         dy = math.random(0, 1)
         trailY = trailY + dy
@@ -54,15 +55,15 @@ function generateMap()
 
     for y = 1, #map do
         for x = 1, #map[y] do
-            local tile = map[y][x]
+            local tile = map[y][x].t
 
             if tile == 1 then
                 local random = math.random()
 
                 if random > 0.7 then
-                    map[y][x] = 2
+                    map[y][x].setTile(2)
                 elseif random > 0.5 then
-                    map[y][x] = 4
+                    map[y][x].setTile(4)
                 end
             end
         end
