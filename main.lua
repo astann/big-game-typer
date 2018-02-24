@@ -1,6 +1,7 @@
 require "player"
 require "map"
 require "words"
+require "enemy"
 
 local WINDOW_W = 640
 local WINDOW_H = 480
@@ -24,12 +25,13 @@ function love.load()
     init()
 
     player = makePlayer(30, 30)
-    word = ""
+    enemies = {}
     printedWord = ""
 end
 
 function startRound()
-    word = words[math.floor(math.random(#words + 1))]
+    table.insert(enemies, makeEnemy(math.random(0, 1) * WINDOW_W, math.random(0, WINDOW_H)))
+    table.insert(enemies, makeEnemy(math.random(0, WINDOW_W), math.random(0, 1) * WINDOW_H))
 end
 
 function love.textinput(text)
@@ -41,21 +43,41 @@ function love.keypressed(key)
         key == "return" or 
         key == "escape" or 
         key == "delete" or 
-        key == "backspace" or 
         key == "clear"
     ) then
-        if key == "return" and printedWord == word then
-            word = ""
+        if key == "return" then
+            for i = 1, #enemies do
+                if enemies[i].word == printedWord then
+                    player.setDirection(enemies[i])
+                    table.remove(enemies, i)
+                    break
+                end
+            end
         end
 
         printedWord = ""
+    elseif key == "backspace" then
+        printedWord = string.sub(printedWord, 1, -2)
     end
 end
 
+function handleEnemyMovement(dt)
+    for i = 1, #enemies do
+        enemies[i].move(dt)
+    end
+end
+
+function handlePlayerMovement(dt)
+    player.move(dt)
+end
+
 function love.update(dt)
-    if word == "" then
+    if #enemies == 0 then
         startRound()
     end
+
+    handleEnemyMovement(dt)
+    handlePlayerMovement(dt)
 end
 
 function drawMap()
@@ -87,6 +109,9 @@ function love.draw()
 
     player.draw()
 
-    love.graphics.print(word, 300, 300)
+    for i = 1, #enemies do
+        enemies[i].draw()
+    end
+
     love.graphics.print(printedWord, player.x, player.y - 20)
 end
