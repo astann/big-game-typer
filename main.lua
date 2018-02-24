@@ -11,6 +11,7 @@ function loadAssets()
     grass = love.graphics.newImage('assets/grass.png')
     tree = love.graphics.newImage('assets/tree.png')
     trail = love.graphics.newImage('assets/trail.png')
+    water = love.graphics.newImage('assets/water.png')
     comicSans = love.graphics.newFont('assets/comicsans.ttf', 20)
 end
 
@@ -24,7 +25,8 @@ function love.load()
     loadAssets()
     init()
 
-    player = makePlayer(30, 30)
+    map = generateMap()
+    player = makePlayer(100, 70)
     enemies = {}
     printedWord = ""
 end
@@ -89,17 +91,18 @@ function drawMap()
             local tileImage = grass
 
             if tile  > 0 then
-               if tile == 3 then
+                if tile == 3 then
                     tileImage = trail
+                elseif tile == 4 then
+                    tileImage = water
                 end
 
-                love.graphics.draw(tileImage, column * 64 - offset * 32, row * 48)
+                love.graphics.draw(tileImage, column * 32 - offset * 16, row * 24)
             end
 
-            if map[row][column] == 2 then
-                love.graphics.draw(tree, column * 64 - offset * 32 + 24, row * 48 - 56)
+            if tile == 2 then
+                love.graphics.draw(tree, column * 32 - offset * 16 + 8, row * 24 - 28)
             end
-
         end
     end
 end
