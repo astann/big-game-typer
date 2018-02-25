@@ -622,7 +622,6 @@ words = {
     "coming",
     "tuesday",
     "object",
-    "lesbian",
     "machine",
     "length",
     "actually",
@@ -3102,7 +3101,6 @@ words = {
     "stretch",
     "durham",
     "permits",
-    "muslim",
     "sleeve",
     "netscape",
     "cleaner",
@@ -3638,7 +3636,6 @@ words = {
     "verizon",
     "scored",
     "clone",
-    "dicks",
     "velocity",
     "lambda",
     "relay",
@@ -5089,7 +5086,6 @@ words = {
     "emperor",
     "dylan",
     "belts",
-    "blacks",
     "educated",
     "rebates",
     "burke",
@@ -5458,4 +5454,4 @@ words = {
     "outlets",
     "arbor",
     "poison"
-}
+ }

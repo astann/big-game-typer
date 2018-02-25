@@ -37,6 +37,7 @@ end
 
 function init()
     math.randomseed(os.time())
+    love.window.setTitle("TYPEHUNTER")
     love.window.setMode(WINDOW_W, WINDOW_H)
     love.graphics.setFont(comicSans)
 end
@@ -164,9 +165,9 @@ end
 
 function handleKeyGame(key)
     if (
-        key == "return" or 
-        key == "escape" or 
-        key == "delete" or 
+        key == "return" or
+        key == "escape" or
+        key == "delete" or
         key == "clear"
     ) then
         if key == "return" then
@@ -255,7 +256,7 @@ function handlePlayerMovement(dt)
             end
         end
     end
- 
+
     if #enemies > 0 then
         for i = 1, #enemies do
             if collision(enemies[i], dt) then
@@ -278,7 +279,7 @@ function updateIntro(dt)
 
     if timer > 7  then
         menuPosition = 480
-        
+
         if menuImage == intro1 then
             menuImage = intro2
         elseif menuImage == intro2 then
@@ -356,7 +357,7 @@ function drawMap()
 end
 
 function drawIntro()
-   love.graphics.draw(menuImage, 0, menuPosition) 
+   love.graphics.draw(menuImage, 0, menuPosition)
    love.graphics.print("any key to skip animated intro", 360, 440)
 end
 
@@ -384,7 +385,7 @@ function drawMenu()
 end
 
 function drawTutorial()
-    love.graphics.draw(tutorial, 0, 0) 
+    love.graphics.draw(tutorial, 0, 0)
     love.graphics.print("press Enter to open menu", 400, 440)
 end
 
