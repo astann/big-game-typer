@@ -6,6 +6,7 @@ require "tile"
 
 local WINDOW_W = 640
 local WINDOW_H = 480
+local BOOST_READY = 10
 
 function loadAssets()
     playerImage = love.graphics.newImage('assets/player.png')
@@ -27,10 +28,19 @@ function love.load()
     loadAssets()
     init()
 
-    map = generateMap()
+    difficulty = 1
     player = makePlayer(100, 65)
+    startLevel()
     enemies = {}
     printedWord = ""
+    aimLine = {}
+    boost = 0
+end
+
+function startLevel()
+    map = generateMap(difficulty)
+    player.x = 100
+    player.y = 65
 end
 
 function startRound()
@@ -54,6 +64,7 @@ function love.keypressed(key)
                 if enemies[i].word == printedWord then
                     player.setDirection(enemies[i])
                     table.remove(enemies, i)
+                    boost = boost + 1
                     break
                 end
             end
@@ -64,21 +75,29 @@ function love.keypressed(key)
         printedWord = string.sub(printedWord, 1, -2)
     end
 
-    --[[if love.keyboard.isDown("left") then
+    if boost >= BOOST_READY and love.keyboard.isDown("left") then
         player.v_x = -1
+        player.v_y = 0
+        boost = 0
     end
 
-    if love.keyboard.isDown("right") then
+    if boost >= BOOST_READY and love.keyboard.isDown("right") then
         player.v_x = 1
+        player.v_y = 0
+        boost = 0
     end
 
-    if love.keyboard.isDown("up") then
+    if boost >= BOOST_READY and love.keyboard.isDown("up") then
         player.v_y = -1
+        player.v_x = 0
+        boost = 0
     end
 
-    if love.keyboard.isDown("down") then
+    if boost >= BOOST_READY and love.keyboard.isDown("down") then
         player.v_y = 1
-    end]]--
+        player.v_x = 0
+        boost = 0
+    end
 end
 
 function handleEnemyMovement(dt)
@@ -115,6 +134,13 @@ function love.update(dt)
 
     handleEnemyMovement(dt)
     handlePlayerMovement(dt)
+
+    if player.c_x > 580 or player.c_y > 410 then
+        difficulty = difficulty + 1
+        player.v_x = 0
+        player.v_y = 0
+        startLevel()
+    end
 end
 
 function drawMap()
@@ -152,7 +178,15 @@ function love.draw()
 
     for i = 1, #enemies do
         enemies[i].draw()
+        if enemies[i].word == printedWord then
+            love.graphics.line(player.c_x + 8, player.c_y - 2, enemies[i].x + 10, enemies[i].y + 10)
+        end
     end
 
-    love.graphics.print(printedWord, player.x, player.y - 20)
+    love.graphics.print(printedWord, player.x - 30, player.y - 30)
+    if boost >= BOOST_READY then
+        love.graphics.print("boost ok", player.x - 30, player.y + 30)
+    else
+        love.graphics.print("boost " .. boost .. "/" .. BOOST_READY, player.x - 30, player.y + 30)
+    end
 end

@@ -60,9 +60,9 @@ function generateMap()
             if tile == 1 then
                 local random = math.random()
 
-                if random > 0.9 then
+                if random > 1 - difficulty * 0.05 then
                     map[y][x].setTile(2)
-                elseif random > 0.8 then
+                elseif random > 1 - difficulty * 0.075 then
                     map[y][x].setTile(4)
                 end
             end
