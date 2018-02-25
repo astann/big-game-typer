@@ -55,6 +55,7 @@ function love.load()
     selectedMenu = 0
     timer = 0
     difficulty = 1
+    gameLength = 3
     targetDifficulty = 3
     player = makePlayer(100, 65)
     enemies = {}
@@ -83,7 +84,9 @@ function handleKeyIntro(key)
 end
 
 function handleKeyTutorial(key)
-    state = 2
+    if key == "return" then
+        state = 2
+    end
 end
 
 function handleKeyMenu(key)
@@ -104,12 +107,14 @@ function handleKeyMenu(key)
     end
 
     if key == "left" then
-        if selectedMenu == 1 and targetDifficulty > 2 then
-            targetDifficulty = targetDifficulty - 1
+        if selectedMenu == 1 and gameLength > 2 then
+            gameLength = gameLength - 1
+            targetDifficulty = difficulty + gameLength - 1
         end
 
         if selectedMenu == 2 and difficulty > 1 then
             difficulty = difficulty - 1
+            targetDifficulty = difficulty + gameLength - 1
         end
 
         if selectedMenu == 5 then
@@ -118,12 +123,14 @@ function handleKeyMenu(key)
     end
 
     if key == "right" then
-        if selectedMenu == 1 and targetDifficulty < 10 then
-            targetDifficulty = targetDifficulty + 1
+        if selectedMenu == 1 and gameLength < 10 then
+            gameLength = gameLength + 1
+            targetDifficulty = difficulty + gameLength - 1
         end
 
         if selectedMenu == 2 and difficulty < 5 then
             difficulty = difficulty + 1
+            targetDifficulty = difficulty + gameLength - 1
         end
 
         if selectedMenu == 5 then
@@ -295,6 +302,8 @@ function updateGame(dt)
             state = 5
             enemies = {}
             difficulty = 1
+            gameLength = 3
+            targetDifficulty = 3
         else
             difficulty = difficulty + 1
             player.v_x = 0
@@ -349,7 +358,7 @@ function drawMenu()
 
     love.graphics.print("TYPEHUNTER", 230, 100)
     love.graphics.print("START", 60, 150)
-    love.graphics.print("GAME LENGTH: < " .. targetDifficulty .. " > MAPS", 60, 180)
+    love.graphics.print("GAME LENGTH: < " .. gameLength .. " > MAPS", 60, 180)
     love.graphics.print("STARTING DIFFICULTY: < " .. difficulty .. " >", 60, 210)
     love.graphics.print("TUTORIAL", 60, 240)
     love.graphics.print("INTRO", 60, 270)
@@ -369,7 +378,7 @@ end
 
 function drawTutorial()
     love.graphics.draw(tutorial, 0, 0) 
-    love.graphics.print("any key to open menu", 420, 440)
+    love.graphics.print("press Enter to open menu", 400, 440)
 end
 
 function drawGame()
@@ -394,12 +403,12 @@ end
 
 function drawBadend()
     love.graphics.draw(badend, 0, 0)
-    love.graphics.print("any key to open menu", 420, 440)
+    love.graphics.print("press Enter to open menu", 400, 440)
 end
 
 function drawGoodend()
     love.graphics.draw(goodend, 0, 0)
-    love.graphics.print("any key to open menu", 420, 440)
+    love.graphics.print("press Enter to open menu", 400, 440)
 end
 
 function love.draw()
