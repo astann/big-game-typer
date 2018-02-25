@@ -10,12 +10,27 @@ local BOOST_READY = 10
 
 function loadAssets()
     playerImage = love.graphics.newImage('assets/player.png')
+
+    enemy = love.graphics.newImage('assets/enemy.png')
+
     grass = love.graphics.newImage('assets/grass.png')
     tree = love.graphics.newImage('assets/tree.png')
     trail = love.graphics.newImage('assets/trail.png')
     water = love.graphics.newImage('assets/water.png')
-    enemy = love.graphics.newImage('assets/enemy.png')
+
+    intro1 = love.graphics.newImage('assets/intro1.png')
+    intro2 = love.graphics.newImage('assets/intro2.png')
+    intro3 = love.graphics.newImage('assets/intro3.png')
+    goodend = love.graphics.newImage('assets/goodend.png')
+    badend = love.graphics.newImage('assets/badend.png')
+    tutorial = love.graphics.newImage('assets/tutorial.png')
+
     comicSans = love.graphics.newFont('assets/comicsans.ttf', 20)
+
+    music = love.audio.newSource('assets/typehunter.ogg')
+    music:setLooping(true)
+    shot = love.audio.newSource('assets/shot.ogg')
+    boostSound = love.audio.newSource('assets/shot.ogg')
 end
 
 function init()
@@ -25,12 +40,23 @@ function init()
 end
 
 function love.load()
+    state = 0
+    musicOn = true
     loadAssets()
     init()
 
+    if musicOn then
+        love.audio.play(music)
+    end
+
+    assistMode = false
+    menuImage = intro1
+    menuPosition = 480
+    selectedMenu = 0
+    timer = 0
     difficulty = 1
+    targetDifficulty = 3
     player = makePlayer(100, 65)
-    startLevel()
     enemies = {}
     printedWord = ""
     aimLine = {}
@@ -44,7 +70,7 @@ function startLevel()
 end
 
 function startRound()
-    table.insert(enemies, makeEnemy(math.random(0, 1) * WINDOW_W, math.random(0, WINDOW_H)))
+    table.insert(enemies, makeEnemy(math.random(0, 1) * WINDOW_W, math.random(0, WINDOW_H), true))
     table.insert(enemies, makeEnemy(math.random(0, WINDOW_W), math.random(0, 1) * WINDOW_H))
 end
 
@@ -52,7 +78,80 @@ function love.textinput(text)
     printedWord = printedWord .. text
 end
 
-function love.keypressed(key)
+function handleKeyIntro(key)
+    state = 1
+end
+
+function handleKeyTutorial(key)
+    state = 2
+end
+
+function handleKeyMenu(key)
+    if key == "down" then
+        selectedMenu = selectedMenu + 1
+
+        if selectedMenu > 5 then
+            selectedMenu = 0
+        end
+    end
+
+    if key == "up" then
+        selectedMenu = selectedMenu - 1
+
+        if selectedMenu < 0 then
+            selectedMenu = 5
+        end
+    end
+
+    if key == "left" then
+        if selectedMenu == 1 and targetDifficulty > 2 then
+            targetDifficulty = targetDifficulty - 1
+        end
+
+        if selectedMenu == 2 and difficulty > 1 then
+            difficulty = difficulty - 1
+        end
+
+        if selectedMenu == 5 then
+            assistMode = not assistMode
+        end
+    end
+
+    if key == "right" then
+        if selectedMenu == 1 and targetDifficulty < 10 then
+            targetDifficulty = targetDifficulty + 1
+        end
+
+        if selectedMenu == 2 and difficulty < 5 then
+            difficulty = difficulty + 1
+        end
+
+        if selectedMenu == 5 then
+            assistMode = not assistMode
+        end
+    end
+
+    if key == "return" then
+        if selectedMenu == 0 or selectedMenu == 1 or selectedMenu == 2 then
+            state = 3
+            startLevel()
+            startRound()
+            printedWord = ""
+        elseif selectedMenu == 3 then
+            state = 1
+        elseif selectedMenu == 4 then
+            menuImage = intro1
+            menuPosition = 480
+            state = 0
+        end
+
+        if selectedMenu == 5 then
+            assistMode = not assistMode
+        end
+    end
+end
+
+function handleKeyGame(key)
     if (
         key == "return" or 
         key == "escape" or 
@@ -62,6 +161,7 @@ function love.keypressed(key)
         if key == "return" then
             for i = 1, #enemies do
                 if enemies[i].word == printedWord then
+                    love.audio.play(shot)
                     player.setDirection(enemies[i])
                     table.remove(enemies, i)
                     boost = boost + 1
@@ -76,27 +176,45 @@ function love.keypressed(key)
     end
 
     if boost >= BOOST_READY and love.keyboard.isDown("left") then
+        love.audio.play(boostSound)
         player.v_x = -1
         player.v_y = 0
         boost = 0
     end
 
     if boost >= BOOST_READY and love.keyboard.isDown("right") then
+        love.audio.play(boostSound)
         player.v_x = 1
         player.v_y = 0
         boost = 0
     end
 
     if boost >= BOOST_READY and love.keyboard.isDown("up") then
+        love.audio.play(boostSound)
         player.v_y = -1
         player.v_x = 0
         boost = 0
     end
 
     if boost >= BOOST_READY and love.keyboard.isDown("down") then
+        love.audio.play(boostSound)
         player.v_y = 1
         player.v_x = 0
         boost = 0
+    end
+end
+
+function love.keypressed(key)
+    if state == 0 then
+        handleKeyIntro(key)
+    elseif state == 1 then
+        handleKeyTutorial(key)
+    elseif state == 2 then
+        handleKeyMenu(key)
+    elseif state == 3 then
+        handleKeyGame(key)
+    else
+        handleKeyTutorial(key)
     end
 end
 
@@ -123,11 +241,48 @@ function handlePlayerMovement(dt)
             end
         end
     end
+ 
+    if #enemies > 0 then
+        for i = 1, #enemies do
+            if collision(enemies[i], dt) then
+                state = 4
+                enemies = {}
+                break
+            end
+        end
+    end
 
     player.move(dt)
 end
 
-function love.update(dt)
+function updateIntro(dt)
+    timer = timer + dt
+
+    if menuPosition > 0 then
+        menuPosition = menuPosition - 1 * timer
+    end
+
+    if timer > 7  then
+        menuPosition = 480
+        
+        if menuImage == intro1 then
+            menuImage = intro2
+        elseif menuImage == intro2 then
+            menuImage = intro3
+        elseif menuImage == intro3 then
+            menuImage = tutorial
+            state = 1
+        end
+
+        timer = 0
+    end
+end
+
+function updateGame(dt)
+    if assistMode then
+        boost = 10
+    end
+
     if #enemies == 0 then
         startRound()
     end
@@ -136,10 +291,24 @@ function love.update(dt)
     handlePlayerMovement(dt)
 
     if player.c_x > 580 or player.c_y > 410 then
-        difficulty = difficulty + 1
-        player.v_x = 0
-        player.v_y = 0
-        startLevel()
+        if difficulty == targetDifficulty then
+            state = 5
+            enemies = {}
+            difficulty = 1
+        else
+            difficulty = difficulty + 1
+            player.v_x = 0
+            player.v_y = 0
+            startLevel()
+        end
+    end
+end
+
+function love.update(dt)
+    if state == 0 then
+        updateIntro(dt)
+    elseif state == 3 then
+        updateGame(dt)
     end
 end
 
@@ -170,10 +339,42 @@ function drawMap()
     end
 end
 
-function love.draw()
-    drawMap()
+function drawIntro()
+   love.graphics.draw(menuImage, 0, menuPosition) 
+   love.graphics.print("any key to skip animated intro", 360, 440)
+end
 
+function drawMenu()
+    local selectedMenuY = 150 + selectedMenu * 30
+
+    love.graphics.print("TYPEHUNTER", 230, 100)
+    love.graphics.print("START", 60, 150)
+    love.graphics.print("GAME LENGTH: < " .. targetDifficulty .. " > MAPS", 60, 180)
+    love.graphics.print("STARTING DIFFICULTY: < " .. difficulty .. " >", 60, 210)
+    love.graphics.print("TUTORIAL", 60, 240)
+    love.graphics.print("INTRO", 60, 270)
+    if assistMode then
+        love.graphics.print("ASSIST MODE: ON", 60, 300)
+        love.graphics.print("YOU HAVE BEEN EQUIPPED WITH INFINITE BOOST", 60, 350)
+        love.graphics.print("ONLY USE IF YOU ARE HAVING TROUBLE", 60, 380)
+        love.graphics.print("BUT WANT TO SEE THE ENDING", 60, 410)
+    else
+        love.graphics.print("ASSIST MODE: OFF", 60, 300)
+    end
+
+    love.graphics.print(">", 30, selectedMenuY)
+
+    love.graphics.print("arrows and Enter to navigate", 360, 440)
+end
+
+function drawTutorial()
+    love.graphics.draw(tutorial, 0, 0) 
+    love.graphics.print("any key to open menu", 420, 440)
+end
+
+function drawGame()
     --love.graphics.rectangle("fill", player.c_x, player.c_y, player.c_x2 - player.c_x, player.c_y2 - player.c_y)
+    drawMap()
     player.draw()
 
     for i = 1, #enemies do
@@ -189,4 +390,31 @@ function love.draw()
     else
         love.graphics.print("boost " .. boost .. "/" .. BOOST_READY, player.x - 30, player.y + 30)
     end
+end
+
+function drawBadend()
+    love.graphics.draw(badend, 0, 0)
+    love.graphics.print("any key to open menu", 420, 440)
+end
+
+function drawGoodend()
+    love.graphics.draw(goodend, 0, 0)
+    love.graphics.print("any key to open menu", 420, 440)
+end
+
+function love.draw()
+    if state == 0 then
+        drawIntro()
+    elseif state == 1 then
+        drawTutorial()
+    elseif state == 2 then
+        drawMenu()
+    elseif state == 3 then
+        drawGame()
+    elseif state == 4 then
+        drawBadend()
+    else
+        drawGoodend()
+    end
+
 end

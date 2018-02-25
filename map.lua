@@ -57,7 +57,7 @@ function generateMap()
         for x = 1, #map[y] do
             local tile = map[y][x].t
 
-            if tile == 1 then
+            if tile == 1 and (x > 5 or y > 5) then
                 local random = math.random()
 
                 if random > 1 - difficulty * 0.05 then
