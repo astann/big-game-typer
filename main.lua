@@ -10,8 +10,10 @@ local BOOST_READY = 10
 
 function loadAssets()
     playerImage = love.graphics.newImage('assets/player.png')
+    boostImage = love.graphics.newImage('assets/boost.png')
 
     enemy = love.graphics.newImage('assets/enemy.png')
+    bloodImage = love.graphics.newImage('assets/blood.png')
 
     grass = love.graphics.newImage('assets/grass.png')
     tree = love.graphics.newImage('assets/tree.png')
@@ -30,7 +32,7 @@ function loadAssets()
     music = love.audio.newSource('assets/typehunter.ogg')
     music:setLooping(true)
     shot = love.audio.newSource('assets/shot.ogg')
-    boostSound = love.audio.newSource('assets/shot.ogg')
+    boostSound = love.audio.newSource('assets/boost.ogg')
 end
 
 function init()
@@ -59,12 +61,14 @@ function love.load()
     targetDifficulty = 3
     player = makePlayer(100, 65)
     enemies = {}
+    blood = {}
     printedWord = ""
     aimLine = {}
     boost = 0
 end
 
 function startLevel()
+    blood = {}
     map = generateMap(difficulty)
     player.x = 100
     player.y = 65
@@ -170,6 +174,9 @@ function handleKeyGame(key)
                 if enemies[i].word == printedWord then
                     love.audio.play(shot)
                     player.setDirection(enemies[i])
+                    enemies[i].image = bloodImage
+                    enemies[i].word = ""
+                    table.insert(blood, enemies[i])
                     table.remove(enemies, i)
                     boost = boost + 1
                     break
@@ -391,6 +398,10 @@ function drawGame()
         if enemies[i].word == printedWord then
             love.graphics.line(player.c_x + 8, player.c_y - 2, enemies[i].x + 10, enemies[i].y + 10)
         end
+    end
+
+    for i = 1, #blood do
+        blood[i].draw()
     end
 
     love.graphics.print(printedWord, player.x - 30, player.y - 30)

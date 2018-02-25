@@ -15,10 +15,26 @@ function makePlayer(x, y)
     player.c_y2 = player.c_y + 6
 
     player.draw = function()
+        if player.v_x == 0 and player.v_y == 1 then
+            love.graphics.draw(boostImage, player.x + 25, player.y - 5, math.rad(90))
+        end
+
+        if player.v_x == 1 and player.v_y == 0 then
+            love.graphics.draw(boostImage, player.x - 20, player.y)
+        end
+
+        if player.v_x == -1 and player.v_y == 0 then
+            love.graphics.draw(boostImage, player.x + 40, player.y, 0, -1, 1)
+        end
+
         if player.v_x > 0 then
             love.graphics.draw(player.image, player.x, player.y)
         else
             love.graphics.draw(player.image, player.x + 20, player.y, 0, -1, 1)
+        end
+
+        if player.v_x == 0 and player.v_y == -1 then
+            love.graphics.draw(boostImage, player.x - 4, player.y + 40, math.rad(-90))
         end
     end
 
