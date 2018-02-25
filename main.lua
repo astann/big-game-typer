@@ -391,6 +391,11 @@ end
 function drawGame()
     --love.graphics.rectangle("fill", player.c_x, player.c_y, player.c_x2 - player.c_x, player.c_y2 - player.c_y)
     drawMap()
+
+    for i = 1, #blood do
+        blood[i].draw()
+    end
+
     player.draw()
 
     for i = 1, #enemies do
@@ -398,10 +403,6 @@ function drawGame()
         if enemies[i].word == printedWord then
             love.graphics.line(player.c_x + 8, player.c_y - 2, enemies[i].x + 10, enemies[i].y + 10)
         end
-    end
-
-    for i = 1, #blood do
-        blood[i].draw()
     end
 
     love.graphics.print(printedWord, player.x - 30, player.y - 30)
