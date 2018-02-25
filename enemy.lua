@@ -4,7 +4,7 @@ function makeEnemy(x, y)
     local enemy = {
         x = x,
         y = y,
-        image = playerImage
+        image = enemy 
     }
 
     enemy.word = words[math.floor(math.random(#words))]

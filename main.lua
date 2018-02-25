@@ -13,6 +13,7 @@ function loadAssets()
     tree = love.graphics.newImage('assets/tree.png')
     trail = love.graphics.newImage('assets/trail.png')
     water = love.graphics.newImage('assets/water.png')
+    enemy = love.graphics.newImage('assets/enemy.png')
     comicSans = love.graphics.newFont('assets/comicsans.ttf', 20)
 end
 
